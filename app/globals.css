@@ -37,8 +37,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  /* Add user input color variable */
-  --user-input: oklch(0.145 0 0);
+  /* User input color - blue for user-filled cells */
+  --user-input: oklch(0.488 0.243 264.376);
+  /* Given number color - darker for system-generated cells */
+  --given-number: oklch(0.145 0 0);
 }
 
 .dark {
@@ -74,8 +76,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
-  /* User input color for dark mode */
-  --user-input: oklch(0.985 0 0);
+  /* User input color for dark mode - lighter blue */
+  --user-input: oklch(0.696 0.17 162.48);
+  /* Given number color for dark mode */
+  --given-number: oklch(0.985 0 0);
 }
 
 @theme inline {
@@ -115,8 +119,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  /* Add user input color variable */
-  --user-input: var(--user-input);
+  /* User input and given number color variables */
+  --color-user-input: var(--user-input);
+  --color-given-number: var(--given-number);
 }
 
 @layer base {

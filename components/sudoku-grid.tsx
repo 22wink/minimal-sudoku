@@ -28,19 +28,24 @@ export function SudokuGrid({ grid, onCellSelect }: SudokuGridProps) {
                 {
                   "bg-primary text-primary-foreground": cell.isSelected,
                   "bg-accent": cell.isHighlighted && !cell.isSelected,
-                  "font-bold text-foreground": cell.isGiven,
-                  "font-semibold": !cell.isGiven && cell.value,
                   "bg-destructive/20 text-destructive": cell.hasConflict,
                   "bg-destructive text-destructive-foreground": cell.hasConflict && cell.isSelected,
                   "bg-yellow-200 dark:bg-yellow-800 ring-2 ring-yellow-400 animate-pulse": cell.isHinted,
                 },
               )}
               style={
-                !cell.isGiven && cell.value
-                  ? {
-                      color: "hsl(var(--user-input))",
-                      fontWeight: "600",
-                    }
+                cell.value
+                  ? cell.isGiven
+                    ? {
+                        // System-generated numbers - darker, bold
+                        color: "var(--given-number)",
+                        fontWeight: "700",
+                      }
+                    : {
+                        // User-filled numbers - blue color
+                        color: "var(--user-input)",
+                        fontWeight: "600",
+                      }
                   : undefined
               }
             >

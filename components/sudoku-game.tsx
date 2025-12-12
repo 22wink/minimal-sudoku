@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { SudokuGrid } from "./sudoku-grid"
 import { GameHeader } from "./game-header"
 import { GameControls } from "./game-controls"
@@ -286,8 +286,9 @@ export function SudokuGame() {
   )
 
   const handleCellSelect = useCallback(
-    (row: number, col: number) => {
-      if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
+    (row: number, col: number, forceSelect: boolean = false) => {
+      // If clicking the same cell and not forced, toggle selection off
+      if (!forceSelect && selectedCell && selectedCell.row === row && selectedCell.col === col) {
         setSelectedCell(null)
         setGrid((prevGrid) =>
           prevGrid.map((gridRow) =>
@@ -384,6 +385,59 @@ export function SudokuGame() {
   const toggleGameMode = useCallback(() => {
     setGameMode((prev) => (prev === "normal" ? "notes" : "normal"))
   }, [])
+
+  // Use refs to store latest values for keyboard handler
+  const selectedCellRef = useRef(selectedCell)
+  const gameModeRef = useRef(gameMode)
+  const gridRef = useRef(grid)
+  const handleNumberInputRef = useRef(handleNumberInput)
+  const handleClearCellRef = useRef(handleClearCell)
+
+  // Update refs when values change
+  useEffect(() => {
+    selectedCellRef.current = selectedCell
+    gameModeRef.current = gameMode
+    gridRef.current = grid
+    handleNumberInputRef.current = handleNumberInput
+    handleClearCellRef.current = handleClearCell
+  }, [selectedCell, gameMode, grid, handleNumberInput, handleClearCell])
+
+  // Keyboard input handler
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't handle keyboard input if user is typing in an input field
+      const target = event.target as HTMLElement
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return
+      }
+
+      // Handle number keys 1-9
+      if (event.key >= "1" && event.key <= "9") {
+        const number = parseInt(event.key, 10)
+        if (selectedCellRef.current) {
+          event.preventDefault()
+          handleNumberInputRef.current(number)
+        }
+        return
+      }
+
+      // Handle Delete and Backspace to clear cell
+      if ((event.key === "Delete" || event.key === "Backspace") && selectedCellRef.current) {
+        event.preventDefault()
+        handleClearCellRef.current()
+        return
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, []) // Empty dependency array since we use refs
 
   return (
     <div className="flex flex-col min-h-screen max-w-md mx-auto px-4 py-6 gap-6 sudoku-container">
