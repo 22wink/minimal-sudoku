@@ -37,10 +37,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  /* User input color - blue for user-filled cells */
-  --user-input: oklch(0.488 0.243 264.376);
-  /* Given number color - darker for system-generated cells */
-  --given-number: oklch(0.145 0 0);
+  /* User input color (for numbers filled by user) - will be set by theme provider */
+  --user-input-color: oklch(0.5 0.233 264.052);
+  /* Given number color (for system-generated numbers) */
+  --given-number: 0 0% 0%;
 }
 
 .dark {
@@ -76,10 +76,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
-  /* User input color for dark mode - lighter blue */
-  --user-input: oklch(0.696 0.17 162.48);
+  /* User input color for dark mode - will be set by theme provider */
+  --user-input-color: oklch(0.7 0.191 264.052);
   /* Given number color for dark mode */
-  --given-number: oklch(0.985 0 0);
+  --given-number: 0 0% 100%;
 }
 
 @theme inline {

@@ -66,7 +66,12 @@ export function ThemeProvider({ children, ...props }: CustomThemeProviderProps) 
       root.style.setProperty("--background", backgroundColorValues.background)
       root.style.setProperty("--card", backgroundColorValues.card)
 
-      root.style.setProperty("--user-input", isDark ? "0 0% 98%" : "222.2 84% 4.9%")
+      // User input color uses theme primary color
+      // Convert oklch to hsl for user-input (approximate conversion)
+      // For simplicity, we'll use the primary color directly
+      root.style.setProperty("--user-input-color", accentColorValues.primary)
+      // Given number color (system-generated, darker/more prominent)
+      root.style.setProperty("--given-number", isDark ? "0 0% 100%" : "0 0% 0%")
     }
 
     applyColors()

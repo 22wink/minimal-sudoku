@@ -18,36 +18,42 @@ export function SudokuGrid({ grid, onCellSelect }: SudokuGridProps) {
               key={`${rowIndex}-${colIndex}`}
               onClick={() => onCellSelect(rowIndex, colIndex)}
               className={cn(
-                "aspect-square flex items-center justify-center text-lg font-medium transition-colors",
-                "border border-border hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset",
+                "aspect-square flex items-center justify-center text-lg font-medium transition-all",
+                "border hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset",
                 {
-                  "border-r-2 border-r-foreground": colIndex === 2 || colIndex === 5,
-                  "border-b-2 border-b-foreground": rowIndex === 2 || rowIndex === 5,
+                  // Default border
+                  "border-border": !cell.isSelected,
+                  // Selected cell border
+                  "border-primary": cell.isSelected,
+                  // Thick borders for 3x3 boxes
+                  "border-r-2": colIndex === 2 || colIndex === 5,
+                  "border-b-2": rowIndex === 2 || rowIndex === 5,
+                  // Keep foreground color for thick borders when not selected
+                  "border-r-foreground": (colIndex === 2 || colIndex === 5) && !cell.isSelected,
+                  "border-b-foreground": (rowIndex === 2 || rowIndex === 5) && !cell.isSelected,
+                  // Selected cell uses primary color for all borders
+                  "border-r-primary": (colIndex === 2 || colIndex === 5) && cell.isSelected,
+                  "border-b-primary": (rowIndex === 2 || rowIndex === 5) && cell.isSelected,
                 },
                 // Cell states
                 {
-                  "bg-primary text-primary-foreground": cell.isSelected,
                   "bg-accent": cell.isHighlighted && !cell.isSelected,
                   "bg-destructive/20 text-destructive": cell.hasConflict,
                   "bg-destructive text-destructive-foreground": cell.hasConflict && cell.isSelected,
                   "bg-yellow-200 dark:bg-yellow-800 ring-2 ring-yellow-400 animate-pulse": cell.isHinted,
                 },
               )}
-              style={
-                cell.value
-                  ? cell.isGiven
-                    ? {
-                        // System-generated numbers - darker, bold
-                        color: "var(--given-number)",
-                        fontWeight: "700",
-                      }
-                    : {
-                        // User-filled numbers - blue color
-                        color: "var(--user-input)",
-                        fontWeight: "600",
-                      }
-                  : undefined
-              }
+              style={{
+                // User input color uses theme primary color
+                ...(cell.value
+                  ? {
+                      color: cell.isGiven
+                        ? "hsl(var(--given-number))"
+                        : "var(--user-input-color)",
+                      fontWeight: cell.isGiven ? "700" : "600",
+                    }
+                  : {}),
+              }}
             >
               {cell.value ? (
                 <span className="text-base sm:text-lg">{cell.value}</span>

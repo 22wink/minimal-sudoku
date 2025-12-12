@@ -32,7 +32,7 @@ html {
         {/* Updated ThemeProvider to include custom accent colors */}
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <I18nWrapper>
-            {children}
+          {children}
           </I18nWrapper>
         </ThemeProvider>
       </body>

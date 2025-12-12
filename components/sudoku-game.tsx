@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { SudokuGrid } from "./sudoku-grid"
 import { GameHeader } from "./game-header"
 import { GameControls } from "./game-controls"
@@ -84,20 +84,16 @@ export function SudokuGame() {
   }, [isTimerRunning, isComplete])
 
   // Save game state for undo/redo
-  const saveGameState = useCallback(() => {
-    const newState: GameState = {
-      grid: grid.map((row) => row.map((cell) => ({ ...cell }))),
-      selectedCell,
-      gameMode,
-    }
-
-    setGameHistory((prev) => {
-      const newHistory = prev.slice(0, historyIndex + 1)
-      newHistory.push(newState)
-      return newHistory.slice(-50) // Keep last 50 states
+  const saveGameState = useCallback((stateToSave: GameState) => {
+    setHistoryIndex((currentIndex) => {
+      setGameHistory((prevHistory) => {
+        const newHistory = prevHistory.slice(0, currentIndex + 1)
+        newHistory.push(stateToSave)
+        return newHistory.slice(-50) // Keep last 50 states
+      })
+      return Math.min(currentIndex + 1, 49)
     })
-    setHistoryIndex((prev) => Math.min(prev + 1, 49))
-  }, [grid, selectedCell, gameMode, historyIndex])
+  }, [])
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -153,28 +149,6 @@ export function SudokuGame() {
     }
   }, [grid])
 
-  const applyHint = useCallback(() => {
-    if (!currentHint) return
-
-    saveGameState()
-
-    setGrid((prevGrid) => {
-      const newGrid = [...prevGrid]
-      const cell = { ...newGrid[currentHint.row][currentHint.col] }
-      cell.value = currentHint.value
-      cell.notes = []
-      cell.isHinted = false
-      newGrid[currentHint.row][currentHint.col] = cell
-
-      const gridWithConflicts = updateConflicts(newGrid)
-      checkCompletion(gridWithConflicts)
-      return gridWithConflicts
-    })
-
-    setCurrentHint(null)
-    setShowHintDialog(false)
-  }, [currentHint])
-
   const updateConflicts = useCallback((newGrid: SudokuCell[][]) => {
     const numberGrid = newGrid.map((row) => row.map((cell) => cell.value))
     const conflicts = SudokuValidator.getConflicts(numberGrid)
@@ -198,6 +172,34 @@ export function SudokuGame() {
     }
     return complete
   }, [])
+
+  const applyHint = useCallback(() => {
+    if (!currentHint) return
+
+    setGrid((prevGrid) => {
+      // Save current state before applying hint using functional update
+      const currentState: GameState = {
+        grid: prevGrid.map((r) => r.map((c) => ({ ...c }))),
+        selectedCell,
+        gameMode,
+      }
+      saveGameState(currentState)
+
+      const newGrid = [...prevGrid]
+      const cell = { ...newGrid[currentHint.row][currentHint.col] }
+      cell.value = currentHint.value
+      cell.notes = []
+      cell.isHinted = false
+      newGrid[currentHint.row][currentHint.col] = cell
+
+      const gridWithConflicts = updateConflicts(newGrid)
+      checkCompletion(gridWithConflicts)
+      return gridWithConflicts
+    })
+
+    setCurrentHint(null)
+    setShowHintDialog(false)
+  }, [currentHint, selectedCell, gameMode, updateConflicts, checkCompletion, saveGameState])
 
   const generateNewPuzzle = useCallback(
     async (newDifficulty?: Difficulty) => {
@@ -286,9 +288,8 @@ export function SudokuGame() {
   )
 
   const handleCellSelect = useCallback(
-    (row: number, col: number, forceSelect: boolean = false) => {
-      // If clicking the same cell and not forced, toggle selection off
-      if (!forceSelect && selectedCell && selectedCell.row === row && selectedCell.col === col) {
+    (row: number, col: number) => {
+      if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
         setSelectedCell(null)
         setGrid((prevGrid) =>
           prevGrid.map((gridRow) =>
@@ -327,10 +328,15 @@ export function SudokuGame() {
 
       const { row, col } = selectedCell
 
-      // Save state before making changes
-      saveGameState()
-
       setGrid((prevGrid) => {
+        // Save current state before making changes using functional update
+        const currentState: GameState = {
+          grid: prevGrid.map((r) => r.map((c) => ({ ...c }))),
+          selectedCell,
+          gameMode,
+        }
+        saveGameState(currentState)
+
         const newGrid = [...prevGrid]
         const cell = { ...newGrid[row][col] }
 
@@ -363,10 +369,15 @@ export function SudokuGame() {
 
     const { row, col } = selectedCell
 
-    // Save state before clearing
-    saveGameState()
-
     setGrid((prevGrid) => {
+      // Save current state before clearing using functional update
+      const currentState: GameState = {
+        grid: prevGrid.map((r) => r.map((c) => ({ ...c }))),
+        selectedCell,
+        gameMode,
+      }
+      saveGameState(currentState)
+
       const newGrid = [...prevGrid]
       const cell = { ...newGrid[row][col] }
 
@@ -380,64 +391,80 @@ export function SudokuGame() {
       checkCompletion(gridWithConflicts)
       return gridWithConflicts
     })
-  }, [selectedCell, updateConflicts, checkCompletion, saveGameState])
+  }, [selectedCell, gameMode, updateConflicts, checkCompletion, saveGameState])
 
   const toggleGameMode = useCallback(() => {
     setGameMode((prev) => (prev === "normal" ? "notes" : "normal"))
   }, [])
 
-  // Use refs to store latest values for keyboard handler
-  const selectedCellRef = useRef(selectedCell)
-  const gameModeRef = useRef(gameMode)
-  const gridRef = useRef(grid)
-  const handleNumberInputRef = useRef(handleNumberInput)
-  const handleClearCellRef = useRef(handleClearCell)
-
-  // Update refs when values change
-  useEffect(() => {
-    selectedCellRef.current = selectedCell
-    gameModeRef.current = gameMode
-    gridRef.current = grid
-    handleNumberInputRef.current = handleNumberInput
-    handleClearCellRef.current = handleClearCell
-  }, [selectedCell, gameMode, grid, handleNumberInput, handleClearCell])
-
   // Keyboard input handler
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't handle keyboard input if user is typing in an input field
-      const target = event.target as HTMLElement
       if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        (event.target instanceof HTMLElement && event.target.isContentEditable)
       ) {
         return
       }
 
-      // Handle number keys 1-9
-      if (event.key >= "1" && event.key <= "9") {
-        const number = parseInt(event.key, 10)
-        if (selectedCellRef.current) {
-          event.preventDefault()
-          handleNumberInputRef.current(number)
-        }
+      // Handle number keys (1-9)
+      const number = parseInt(event.key)
+      if (number >= 1 && number <= 9) {
+        event.preventDefault()
+        handleNumberInput(number)
         return
       }
 
-      // Handle Delete and Backspace to clear cell
-      if ((event.key === "Delete" || event.key === "Backspace") && selectedCellRef.current) {
+      // Handle Delete or Backspace to clear cell
+      if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault()
-        handleClearCellRef.current()
+        handleClearCell()
+        return
+      }
+
+      // Handle arrow keys to navigate
+      if (selectedCell) {
+        const { row, col } = selectedCell
+        let newRow = row
+        let newCol = col
+
+        switch (event.key) {
+          case "ArrowUp":
+            event.preventDefault()
+            newRow = Math.max(0, row - 1)
+            handleCellSelect(newRow, col)
+            return
+          case "ArrowDown":
+            event.preventDefault()
+            newRow = Math.min(8, row + 1)
+            handleCellSelect(newRow, col)
+            return
+          case "ArrowLeft":
+            event.preventDefault()
+            newCol = Math.max(0, col - 1)
+            handleCellSelect(row, newCol)
+            return
+          case "ArrowRight":
+            event.preventDefault()
+            newCol = Math.min(8, col + 1)
+            handleCellSelect(row, newCol)
+            return
+        }
+      }
+
+      // Handle spacebar to toggle notes mode
+      if (event.key === " ") {
+        event.preventDefault()
+        toggleGameMode()
         return
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  }, []) // Empty dependency array since we use refs
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [selectedCell, handleNumberInput, handleClearCell, handleCellSelect, toggleGameMode])
 
   return (
     <div className="flex flex-col min-h-screen max-w-md mx-auto px-4 py-6 gap-6 sudoku-container">
