@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { Edit3, Eraser, Undo, Redo, Lightbulb } from "lucide-react"
 import type { GameMode } from "./sudoku-game"
+import { useI18n } from "@/lib/i18n-context"
 
 interface GameControlsProps {
   gameMode: GameMode
@@ -30,6 +31,8 @@ export function GameControls({
   canUndo,
   canRedo,
 }: GameControlsProps) {
+  const { t } = useI18n()
+  
   return (
     <TooltipProvider>
       <div className="w-full space-y-4">
@@ -59,11 +62,11 @@ export function GameControls({
                 className="flex items-center gap-2"
               >
                 <Edit3 className="h-4 w-4" />
-                Notes
+                {t("notes")}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Toggle between number and notes mode</p>
+              <p>{t("toggleNotesMode")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -71,11 +74,11 @@ export function GameControls({
             <TooltipTrigger asChild>
               <Button variant="outline" size="sm" onClick={onClear} className="flex items-center gap-2 bg-transparent">
                 <Eraser className="h-4 w-4" />
-                Clear
+                {t("clear")}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Clear selected cell</p>
+              <p>{t("clearCell")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -89,11 +92,11 @@ export function GameControls({
                 className="flex items-center gap-2 bg-transparent"
               >
                 <Undo className="h-4 w-4" />
-                Undo
+                {t("undo")}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Undo last move</p>
+              <p>{t("undoMove")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -107,11 +110,11 @@ export function GameControls({
                 className="flex items-center gap-2 bg-transparent"
               >
                 <Redo className="h-4 w-4" />
-                Redo
+                {t("redo")}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Redo last undone move</p>
+              <p>{t("redoMove")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -119,11 +122,11 @@ export function GameControls({
             <TooltipTrigger asChild>
               <Button variant="outline" size="sm" onClick={onHint} className="flex items-center gap-2 bg-transparent">
                 <Lightbulb className="h-4 w-4" />
-                Hint
+                {t("hint")}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Get a hint for the next move</p>
+              <p>{t("getHint")}</p>
             </TooltipContent>
           </Tooltip>
         </div>

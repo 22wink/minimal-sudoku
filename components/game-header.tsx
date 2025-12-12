@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { SettingsDialog } from "./settings-dialog"
 import { ConfirmDialog } from "./confirm-dialog"
 import type { Difficulty } from "@/lib/sudoku-generator"
+import { useI18n } from "@/lib/i18n-context"
 
 interface GameHeaderProps {
   difficulty: Difficulty
@@ -34,12 +35,13 @@ export function GameHeader({
   const { theme, setTheme } = useTheme()
   const [showSettings, setShowSettings] = useState(false)
   const [showSolveConfirm, setShowSolveConfirm] = useState(false)
+  const { t } = useI18n()
 
   const difficultyLabels: Record<Difficulty, string> = {
-    beginner: "Beginner",
-    easy: "Easy",
-    hard: "Hard",
-    impossible: "Impossible",
+    beginner: t("beginner"),
+    easy: t("easy"),
+    hard: t("hard"),
+    impossible: t("impossible"),
   }
 
   const formatTime = (seconds: number) => {
@@ -63,7 +65,7 @@ export function GameHeader({
       <header className="flex items-center justify-between">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">Sudoku</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("sudoku")}</h1>
             {isComplete && <Trophy className="h-5 w-5 text-yellow-500" />}
           </div>
           <div className="flex items-center gap-3">
@@ -107,11 +109,11 @@ export function GameHeader({
                 className="h-9 w-9"
               >
                 {isSolving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                <span className="sr-only">Auto solve</span>
+                <span className="sr-only">{t("autoSolve")}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Auto solve puzzle</p>
+              <p>{t("autoSolve")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -119,11 +121,11 @@ export function GameHeader({
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={onNewGame} disabled={isGenerating} className="h-9 w-9">
                 {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-                <span className="sr-only">New game</span>
+                <span className="sr-only">{t("newGame")}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Generate new puzzle</p>
+              <p>{t("newGame")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -137,11 +139,11 @@ export function GameHeader({
               >
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
+                <span className="sr-only">{t("toggleTheme")}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Toggle dark/light mode</p>
+              <p>{t("toggleTheme")}</p>
             </TooltipContent>
           </Tooltip>
 
@@ -149,11 +151,11 @@ export function GameHeader({
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="h-9 w-9">
                 <Settings className="h-4 w-4" />
-                <span className="sr-only">Settings</span>
+                <span className="sr-only">{t("settings")}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Open settings</p>
+              <p>{t("settings")}</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -165,10 +167,10 @@ export function GameHeader({
         isOpen={showSolveConfirm}
         onClose={() => setShowSolveConfirm(false)}
         onConfirm={confirmAutoSolve}
-        title="Auto Solve Puzzle"
-        description="Are you sure you want to automatically solve this puzzle? This action cannot be undone."
-        confirmText="Solve"
-        cancelText="Cancel"
+        title={t("autoSolveTitle")}
+        description={t("autoSolveDescription")}
+        confirmText={t("solve")}
+        cancelText={t("cancel")}
       />
     </TooltipProvider>
   )

@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { I18nWrapper } from "@/components/i18n-wrapper"
 
 export const metadata: Metadata = {
   title: "Sudoku - Zen Puzzle Game",
@@ -30,7 +31,9 @@ html {
       <body>
         {/* Updated ThemeProvider to include custom accent colors */}
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          <I18nWrapper>
+            {children}
+          </I18nWrapper>
         </ThemeProvider>
       </body>
     </html>

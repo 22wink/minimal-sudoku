@@ -8,21 +8,30 @@ export interface Hint {
   explanation: string
 }
 
+export type HintTranslator = {
+  nakedSingle: string
+  nakedSingleExplanation: (value: number) => string
+  hiddenSingle: string
+  hiddenSingleRow: (num: number, row: number) => string
+  hiddenSingleColumn: (num: number, col: number) => string
+  hiddenSingleBox: (num: number) => string
+}
+
 export class SudokuHintGenerator {
   // Find the next logical move using basic techniques
-  static getHint(grid: (number | null)[][]): Hint | null {
+  static getHint(grid: (number | null)[][], translator?: HintTranslator): Hint | null {
     // Try naked singles first (cells with only one possible value)
-    const nakedSingle = this.findNakedSingle(grid)
+    const nakedSingle = this.findNakedSingle(grid, translator)
     if (nakedSingle) return nakedSingle
 
     // Try hidden singles (numbers that can only go in one place in a unit)
-    const hiddenSingle = this.findHiddenSingle(grid)
+    const hiddenSingle = this.findHiddenSingle(grid, translator)
     if (hiddenSingle) return hiddenSingle
 
     return null
   }
 
-  private static findNakedSingle(grid: (number | null)[][]): Hint | null {
+  private static findNakedSingle(grid: (number | null)[][], translator?: HintTranslator): Hint | null {
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
         if (grid[row][col] === null) {
@@ -32,8 +41,8 @@ export class SudokuHintGenerator {
               row,
               col,
               value: possibleValues[0],
-              technique: "Naked Single",
-              explanation: `Only ${possibleValues[0]} can go in this cell`,
+              technique: translator?.nakedSingle || "Naked Single",
+              explanation: translator?.nakedSingleExplanation(possibleValues[0]) || `Only ${possibleValues[0]} can go in this cell`,
             }
           }
         }
@@ -42,7 +51,7 @@ export class SudokuHintGenerator {
     return null
   }
 
-  private static findHiddenSingle(grid: (number | null)[][]): Hint | null {
+  private static findHiddenSingle(grid: (number | null)[][], translator?: HintTranslator): Hint | null {
     // Check rows
     for (let row = 0; row < 9; row++) {
       for (let num = 1; num <= 9; num++) {
@@ -58,8 +67,8 @@ export class SudokuHintGenerator {
               row,
               col: possibleCols[0],
               value: num,
-              technique: "Hidden Single",
-              explanation: `${num} can only go in this position in row ${row + 1}`,
+              technique: translator?.hiddenSingle || "Hidden Single",
+              explanation: translator?.hiddenSingleRow(num, row) || `${num} can only go in this position in row ${row + 1}`,
             }
           }
         }
@@ -81,8 +90,8 @@ export class SudokuHintGenerator {
               row: possibleRows[0],
               col,
               value: num,
-              technique: "Hidden Single",
-              explanation: `${num} can only go in this position in column ${col + 1}`,
+              technique: translator?.hiddenSingle || "Hidden Single",
+              explanation: translator?.hiddenSingleColumn(num, col) || `${num} can only go in this position in column ${col + 1}`,
             }
           }
         }
@@ -109,8 +118,8 @@ export class SudokuHintGenerator {
                 row: possibleCells[0].row,
                 col: possibleCells[0].col,
                 value: num,
-                technique: "Hidden Single",
-                explanation: `${num} can only go in this position in the 3×3 box`,
+                technique: translator?.hiddenSingle || "Hidden Single",
+                explanation: translator?.hiddenSingleBox(num) || `${num} can only go in this position in the 3×3 box`,
               }
             }
           }

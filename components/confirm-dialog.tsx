@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n-context"
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -26,9 +27,11 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
 }: ConfirmDialogProps) {
+  const { t } = useI18n()
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -38,9 +41,9 @@ export function ConfirmDialog({
         </DialogHeader>
         <DialogFooter className="flex gap-2">
           <Button variant="outline" onClick={onClose}>
-            {cancelText}
+            {cancelText || t("cancel")}
           </Button>
-          <Button onClick={onConfirm}>{confirmText}</Button>
+          <Button onClick={onConfirm}>{confirmText || t("confirm")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

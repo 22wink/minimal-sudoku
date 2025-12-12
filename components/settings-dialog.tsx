@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "next-themes"
 import { useCustomTheme } from "./theme-provider"
-import { Monitor, Moon, Sun, Palette } from "lucide-react"
+import { Monitor, Moon, Sun, Palette, Languages } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
+import { useI18n } from "@/lib/i18n-context"
 
 interface SettingsDialogProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
   const { theme, setTheme } = useTheme()
   const { accentColor, setAccentColor, availableColors, backgroundColor, setBackgroundColor, availableBackgrounds } =
     useCustomTheme()
+  const { language, setLanguage, t } = useI18n()
 
   const [currentTheme, setCurrentTheme] = useState<string>("light")
 
@@ -26,9 +28,14 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
   }, [theme])
 
   const themeOptions = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System", icon: Monitor },
+    { value: "light", label: t("light"), icon: Sun },
+    { value: "dark", label: t("dark"), icon: Moon },
+    { value: "system", label: t("system"), icon: Monitor },
+  ]
+
+  const languageOptions = [
+    { value: "en" as const, label: t("english") },
+    { value: "zh" as const, label: t("chinese") },
   ]
 
   const getColorForTheme = (colorKey: string, isDark: boolean) => {
@@ -50,15 +57,36 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
-            Settings
+            {t("settingsTitle")}
           </DialogTitle>
-          <DialogDescription>Customize your Sudoku experience with themes and display options.</DialogDescription>
+          <DialogDescription>{t("settingsDescription")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+          {/* Language Selection */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Languages className="h-4 w-4" />
+              {t("language")}
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              {languageOptions.map(({ value, label }) => (
+                <Button
+                  key={value}
+                  variant={language === value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setLanguage(value)}
+                  className="flex items-center justify-center gap-2"
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           {/* Theme Mode Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Theme Mode</Label>
+            <Label className="text-sm font-medium">{t("themeMode")}</Label>
             <div className="grid grid-cols-3 gap-2">
               {themeOptions.map(({ value, label, icon: Icon }) => (
                 <Button
@@ -77,7 +105,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 
           {/* Background Color Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Background</Label>
+            <Label className="text-sm font-medium">{t("background")}</Label>
             <div className="grid grid-cols-3 gap-2 p-5">
               {Object.entries(availableBackgrounds).map(([key, bg]) => {
                 const bgColors = getBackgroundForTheme(key, isDarkPreview)
@@ -112,7 +140,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 
           {/* Accent Color Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Accent Color</Label>
+            <Label className="text-sm font-medium">{t("accentColor")}</Label>
             <div className="grid grid-cols-4 gap-2 p-3">
               {Object.entries(availableColors).map(([key, color]) => {
                 const colorValues = getColorForTheme(key, isDarkPreview)
@@ -153,7 +181,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
           </div>
 
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Preview</Label>
+            <Label className="text-sm font-medium">{t("preview")}</Label>
             <div
               className={cn(
                 "p-4 border rounded-lg transition-colors",
@@ -173,7 +201,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                     color: `hsl(${getColorForTheme(accentColor, isDarkPreview).primaryForeground})`,
                   }}
                 >
-                  Primary Button
+                  {t("primaryButton")}
                 </Button>
                 <Button
                   size="sm"
@@ -185,7 +213,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                     color: `hsl(${getColorForTheme(accentColor, isDarkPreview).primary})`,
                   }}
                 >
-                  Secondary
+                  {t("secondary")}
                 </Button>
               </div>
               <div className="grid grid-cols-3 gap-1">
@@ -208,7 +236,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
         </div>
 
         <div className="flex justify-end pt-4 border-t flex-shrink-0">
-          <Button onClick={onClose}>Done</Button>
+          <Button onClick={onClose}>{t("done")}</Button>
         </div>
       </DialogContent>
     </Dialog>

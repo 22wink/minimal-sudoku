@@ -8,6 +8,7 @@ import { SudokuGenerator, numberGridToSudokuGrid, type Difficulty } from "@/lib/
 import { SudokuValidator } from "@/lib/sudoku-solver"
 import { SudokuHintGenerator, type Hint } from "@/lib/sudoku-hints"
 import { CompletionCelebration } from "./completion-celebration"
+import { useI18n } from "@/lib/i18n-context"
 
 export type SudokuCell = {
   value: number | null
@@ -28,6 +29,8 @@ interface GameState {
 }
 
 export function SudokuGame() {
+  const { t, tHint } = useI18n()
+  
   // Initialize empty 9x9 grid
   const initializeGrid = (): SudokuCell[][] => {
     return Array(9)
@@ -119,7 +122,14 @@ export function SudokuGame() {
   // Get hint functionality
   const getHint = useCallback(() => {
     const numberGrid = grid.map((row) => row.map((cell) => cell.value))
-    const hint = SudokuHintGenerator.getHint(numberGrid)
+    const hint = SudokuHintGenerator.getHint(numberGrid, {
+      nakedSingle: t("nakedSingle"),
+      nakedSingleExplanation: tHint.nakedSingleExplanation,
+      hiddenSingle: t("hiddenSingle"),
+      hiddenSingleRow: tHint.hiddenSingleRow,
+      hiddenSingleColumn: tHint.hiddenSingleColumn,
+      hiddenSingleBox: tHint.hiddenSingleBox,
+    })
 
     if (hint) {
       // Clear previous hints
